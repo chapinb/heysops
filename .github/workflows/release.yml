@@ -1,0 +1,70 @@
+name: github pages
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Show version
+        run: echo $RELEASE_VERSION && echo ${{ env.RELEASE_VERSION }}
+
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+
+      - name: Install dependecies
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: install -d # Install all dependencies, including development ones
+
+      - name: Build packages
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: run build
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload source build release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/heysops-${{ env.RELEASE_VERSION }}.tar.gz
+          asset_name: dist/heysops-${{ env.RELEASE_VERSION }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload wheel build release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/heysops-${{ env.RELEASE_VERSION }}-py3-none-any.whl
+          asset_name: dist/heysops-${{ env.RELEASE_VERSION }}-py3-none-any.whl
+          asset_content_type: application/octet-stream
