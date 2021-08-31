@@ -187,11 +187,11 @@ class MyTestCase(unittest.TestCase):
 
     def test_find_gitignore_files(self):
         self.action._check_folder_for_file = MagicMock(
-            side_effect=[False, False, False, True]
+            side_effect=[False, True]
         )
         actual = self.action.find_gitignore_file()
         self.assertEqual(
-            os.path.abspath(os.path.join(os.curdir, "../../../.gitignore")), actual
+            os.path.abspath(os.path.join(os.curdir, "../.gitignore")), actual
         )
 
         # Cause the search to go to the root of the drive
