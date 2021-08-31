@@ -1,0 +1,3 @@
+project: {gitignore_path: ./.gitignore}
+secrets:
+- {decrypted_path: sample/test.txt, encrypted_path: sample/test.txt.sops, type: null}

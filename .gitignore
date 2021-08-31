@@ -1,0 +1,7 @@
+*.pyc
+/htmlcov/
+/docs/_build/
+.idea/
+.coverage
+.pyre_configuration
+sample/test.txt
